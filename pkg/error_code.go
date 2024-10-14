@@ -14,9 +14,9 @@ var (
 var errCode = map[int]string{}
 
 type Error struct {
-	code    int      `json:"code"`
-	msg     string   `json:"msg"`
-	details []string `json:"details"`
+	code    int
+	msg     string
+	details []string
 }
 
 func NewError(code int, msg string) *Error {

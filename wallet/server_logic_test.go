@@ -3,15 +3,15 @@ package wallet
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"gotest.tools/v3/assert"
 )
 
 func TestGetUser(t *testing.T) {
 	userA := bank.Get("")
-	assert.Nil(t, userA, "blank user should return nil")
+	assert.Assert(t, userA == nil, "blank user should return nil")
 
 	userB := bank.Get("b")
-	assert.NotNil(t, userB, "cannot find user b")
+	assert.Assert(t, userB != nil, "cannot find user b")
 }
 
 func TestDeposit(t *testing.T) {
@@ -88,7 +88,7 @@ func TestHistoryEmpty(t *testing.T) {
 	userA := bank.Get("a")
 	userA.Reset()
 	result := userA.History()
-	assert.Equal(t, 0, len(result), "transation list should be empty")
+	assert.Equal(t, 0, len(result), "transition list should be empty")
 }
 
 func TestHistorySuccess(t *testing.T) {
@@ -98,5 +98,5 @@ func TestHistorySuccess(t *testing.T) {
 	userA.Deposit(money)
 	userA.Withdraw(money)
 	result := userA.History()
-	assert.Equal(t, 2, len(result), "wrong transation list length")
+	assert.Equal(t, 2, len(result), "wrong transition list length")
 }

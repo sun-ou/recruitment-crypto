@@ -16,7 +16,7 @@ func NewClient(ServerAddress string) *wallectClient {
 func (w *wallectClient) Post(action string, data interface{}) (code int, body []byte, err error) {
 	url := "http://" + w.ServerAddress + action
 	jsonData, _ := json.Marshal(data)
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData)) // nolint
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -38,10 +38,10 @@ func (w *wallectClient) Deposit(p *ParamDeposit) (result *ResponseBalance, err e
 	code, body, err = w.Post("/api/deposit", p)
 	if err == nil {
 		if code == http.StatusOK {
-			json.Unmarshal(body, &result)
+			_ = json.Unmarshal(body, &result)
 		} else {
 			respError := ResponseError{}
-			json.Unmarshal(body, &respError)
+			_ = json.Unmarshal(body, &respError)
 			err = fmt.Errorf("err code: %d, msg: %s, details: %v", respError.Code, respError.Msg, respError.Details)
 		}
 	}
@@ -54,7 +54,7 @@ func (w *wallectClient) Withdraw(p *ParamWithdraw) (result *ResponseBalance, err
 	code, body, err = w.Post("/api/withdraw", p)
 	if err == nil {
 		if code == http.StatusOK {
-			json.Unmarshal(body, &result)
+			_ = json.Unmarshal(body, &result)
 		} else {
 			respError := ResponseError{}
 			json.Unmarshal(body, &respError)
