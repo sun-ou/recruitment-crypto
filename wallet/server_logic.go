@@ -28,21 +28,21 @@ func (b *Bank) Get(UserName string) *User {
 	return u
 }
 
-// Balance check user balance
+// Balance Get specify user balance
 func (u *User) Balance() uint {
 	u.mu.RLock()
 	defer u.mu.RUnlock()
 	return u.balance
 }
 
-// History list all transactions of the user
+// History Get specify user transaction history
 func (u *User) History() []Transaction {
 	u.mu.RLock()
 	defer u.mu.RUnlock()
 	return u.history
 }
 
-// Deposit user can deposit money into her wallet
+// Deposit Deposit to specify user wallet
 func (u *User) Deposit(money uint) uint {
 	u.mu.Lock()
 	defer u.mu.Unlock()
@@ -57,7 +57,7 @@ func (u *User) Deposit(money uint) uint {
 	return u.balance
 }
 
-// Withdraw user can withdraw money from her wallet
+// Withdraw Withdraw from specify user wallet
 func (u *User) Withdraw(money uint) (uint, bool) {
 	u.mu.Lock()
 	defer u.mu.Unlock()
@@ -79,7 +79,7 @@ func (u *User) Withdraw(money uint) (uint, bool) {
 	return u.balance, true
 }
 
-// Transfer user can send money to another user
+// Transfer Transfer from one user to another user
 func (u *User) Transfer(receiver *User, money uint) (uint, uint, bool) {
 	bank.mu.Lock()
 	defer bank.mu.Unlock()

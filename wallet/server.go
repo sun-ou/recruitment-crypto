@@ -29,7 +29,7 @@ func NewController() *walletController {
 	return &walletController{}
 }
 
-// Deposit user can deposit money into her wallet
+// Deposit Deposit to specify user wallet
 func (w *walletController) Deposit(ctx *gin.Context) {
 	p := &ParamDeposit{}
 	err := ctx.ShouldBindJSON(p)
@@ -46,7 +46,7 @@ func (w *walletController) Deposit(ctx *gin.Context) {
 	pkg.NewResponse(ctx).ToResponse(result)
 }
 
-// Withdraw user can withdraw money from her wallet
+// Withdraw Withdraw from specify user wallet
 func (w *walletController) Withdraw(ctx *gin.Context) {
 	p := &ParamWithdraw{}
 	err := ctx.ShouldBindJSON(p)
@@ -69,7 +69,7 @@ func (w *walletController) Withdraw(ctx *gin.Context) {
 	pkg.NewResponse(ctx).ToResponse(result)
 }
 
-// Transfer user can send money to another user
+// Transfer Transfer from one user to another user
 func (w *walletController) Transfer(ctx *gin.Context) {
 	p := &ParamTransfer{}
 	err := ctx.ShouldBindJSON(p)
@@ -94,7 +94,7 @@ func (w *walletController) Transfer(ctx *gin.Context) {
 	pkg.NewResponse(ctx).ToResponse(result)
 }
 
-// Balance check user balance
+// Balance Get specify user balance
 func (w *walletController) Balance(ctx *gin.Context) {
 	p := &ParamUser{}
 	err := ctx.ShouldBindJSON(p)
@@ -111,7 +111,7 @@ func (w *walletController) Balance(ctx *gin.Context) {
 	pkg.NewResponse(ctx).ToResponse(result)
 }
 
-// History list all transactions of the user
+// History Get specify user transaction history
 func (w *walletController) History(ctx *gin.Context) {
 	p := &ParamUser{}
 	err := ctx.ShouldBindJSON(p)

@@ -3,8 +3,13 @@ package wallet
 import (
 	"testing"
 
+	"go.uber.org/goleak"
 	"gotest.tools/v3/assert"
 )
+
+func TestMain(m *testing.M) {
+	goleak.VerifyTestMain(m)
+}
 
 func TestGetUser(t *testing.T) {
 	userA := bank.Get("")
