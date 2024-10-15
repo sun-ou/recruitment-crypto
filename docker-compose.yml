@@ -1,0 +1,44 @@
+services:
+  app:
+    container_name: app_container
+    build: .
+    command: ./bin/recruitment-crypto
+    restart: on-failure
+    depends_on:
+      - db
+    links:
+      - db
+    ports:
+      - "8080:8080"
+    environment:
+      APP_ENV: docker
+    networks:
+      - sun
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  db:
+    container_name: postgres_container
+    image: postgres:14
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: crypto
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /tmp
+    volumes:
+      - ./database/postgres/data:/var/lib/postgresql/data
+    # Fix operation not permitted
+    security_opt:
+      - seccomp:unconfined
+    networks:
+      - sun
+      
+networks:
+  sun:
+    driver: "bridge"

@@ -7,7 +7,7 @@ import (
 )
 
 func NewRouter() *gin.Engine {
-	gin.SetMode(gin.ReleaseMode)
+	// gin.SetMode(gin.ReleaseMode)
 
 	r := gin.New()
 	// r.Use(gin.Logger())
@@ -19,8 +19,9 @@ func NewRouter() *gin.Engine {
 	api.POST("/deposit", c.Deposit)
 	api.POST("/withdraw", c.Withdraw)
 	api.POST("/transfer", c.Transfer)
-	api.POST("/balance", c.Balance)
-	api.POST("/history", c.History)
+	api.GET("/balance", c.Balance)
+	api.GET("/history", c.History)
+	api.GET("/health", c.Health)
 
 	return r
 }
@@ -32,7 +33,7 @@ func NewController() *walletController {
 // Deposit Deposit to specify user wallet
 func (w *walletController) Deposit(ctx *gin.Context) {
 	p := &ParamDeposit{}
-	err := ctx.ShouldBindJSON(p)
+	err := ctx.ShouldBind(p)
 	if err != nil {
 		pkg.NewResponse(ctx).ToErrorResponse(pkg.InvaildParams.WitchDetails(err.Error()))
 		return
@@ -49,7 +50,7 @@ func (w *walletController) Deposit(ctx *gin.Context) {
 // Withdraw Withdraw from specify user wallet
 func (w *walletController) Withdraw(ctx *gin.Context) {
 	p := &ParamWithdraw{}
-	err := ctx.ShouldBindJSON(p)
+	err := ctx.ShouldBind(p)
 	if err != nil {
 		pkg.NewResponse(ctx).ToErrorResponse(pkg.InvaildParams.WitchDetails(err.Error()))
 		return
@@ -72,14 +73,14 @@ func (w *walletController) Withdraw(ctx *gin.Context) {
 // Transfer Transfer from one user to another user
 func (w *walletController) Transfer(ctx *gin.Context) {
 	p := &ParamTransfer{}
-	err := ctx.ShouldBindJSON(p)
+	err := ctx.ShouldBind(p)
 	if err != nil {
 		pkg.NewResponse(ctx).ToErrorResponse(pkg.InvaildParams.WitchDetails(err.Error()))
 		return
 	}
 
 	sender := bank.Get(p.UserName)
-	receiver := bank.Get(p.Receiver.UserName)
+	receiver := bank.Get(p.Receiver)
 	senderBalance, receiverBalance, ok := sender.Transfer(receiver, p.Money)
 	if !ok {
 		pkg.NewResponse(ctx).ToErrorResponse(pkg.InvaildParams.WitchDetails("not enougth money"))
@@ -97,7 +98,7 @@ func (w *walletController) Transfer(ctx *gin.Context) {
 // Balance Get specify user balance
 func (w *walletController) Balance(ctx *gin.Context) {
 	p := &ParamUser{}
-	err := ctx.ShouldBindJSON(p)
+	err := ctx.ShouldBind(p)
 	if err != nil {
 		pkg.NewResponse(ctx).ToErrorResponse(pkg.InvaildParams.WitchDetails(err.Error()))
 		return
@@ -114,7 +115,7 @@ func (w *walletController) Balance(ctx *gin.Context) {
 // History Get specify user transaction history
 func (w *walletController) History(ctx *gin.Context) {
 	p := &ParamUser{}
-	err := ctx.ShouldBindJSON(p)
+	err := ctx.ShouldBind(p)
 	if err != nil {
 		pkg.NewResponse(ctx).ToErrorResponse(pkg.InvaildParams.WitchDetails(err.Error()))
 		return
@@ -125,4 +126,9 @@ func (w *walletController) History(ctx *gin.Context) {
 	}
 
 	pkg.NewResponse(ctx).ToResponse(result)
+}
+
+// Health health check
+func (w *walletController) Health(ctx *gin.Context) {
+	pkg.NewResponse(ctx).ToResponse(`ok`)
 }

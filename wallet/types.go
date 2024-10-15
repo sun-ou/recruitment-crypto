@@ -25,17 +25,13 @@ type Transaction struct {
 
 type walletController struct{}
 
-type wallectClient struct {
-	ServerAddress string
-}
-
 type ParamUser struct {
-	UserName string `form:"user_name" binding:"required"`
+	UserName string `json:"user_name" form:"user_name" binding:"required"`
 }
 
 type ParamDeposit struct {
 	ParamUser
-	Money uint `form:"money" binding:"required,min=1,max=1000000000"`
+	Money uint `json:"money" binding:"required,min=1,max=1000000000"`
 }
 
 type ParamWithdraw struct {
@@ -44,21 +40,21 @@ type ParamWithdraw struct {
 
 type ParamTransfer struct {
 	ParamDeposit
-	Receiver ParamUser
+	Receiver string `json:"receiver" binding:"required"`
 }
 
 type ResponseTransfer struct {
-	Sender   ResponseBalance
-	Receiver ResponseBalance
+	Sender   ResponseBalance `json:"sender"`
+	Receiver ResponseBalance `json:"receiver"`
 }
 
 type ResponseBalance struct {
-	UserName string
-	Balance  uint
+	UserName string `json:"user_name"`
+	Balance  uint   `json:"balance"`
 }
 
 type ResponseHistory struct {
-	List []Transaction
+	List []Transaction `json:"list"`
 }
 
 type ResponseError struct {
