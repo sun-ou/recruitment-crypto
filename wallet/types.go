@@ -1,26 +1,32 @@
 package wallet
 
-import "sync"
-
-type Bank struct {
-	users map[string]*User
-	mu    sync.Mutex
-}
-
 type User struct {
+	Id       uint
 	UserName string
 	balance  uint
 	history  []Transaction
-	mu       sync.RWMutex
 }
 
 type Transaction struct {
-	Sender     string
-	Receiver   string
+	Id         uint
+	SenderId   uint
+	ReceiverId uint
 	Money      uint
 	Balance    uint
 	Action     string
 	CreateDate int64
+}
+
+type FormatTransaction struct {
+	Id         uint   `json:"id"`
+	SenderId   uint   `json:"sender_id"`
+	Sender     string `json:"sender"`
+	ReceiverId uint   `json:"receiver_id"`
+	Receiver   string `json:"receiver"`
+	Money      string `json:"money"`
+	Balance    string `json:"balance"`
+	Action     string `json:"action"`
+	CreateDate string `json:"create_date"`
 }
 
 type walletController struct{}
@@ -31,7 +37,7 @@ type ParamUser struct {
 
 type ParamDeposit struct {
 	ParamUser
-	Money uint `json:"money" binding:"required,min=1,max=1000000000"`
+	Money string `json:"money" binding:"required,positive_decimal"`
 }
 
 type ParamWithdraw struct {
@@ -50,11 +56,11 @@ type ResponseTransfer struct {
 
 type ResponseBalance struct {
 	UserName string `json:"user_name"`
-	Balance  uint   `json:"balance"`
+	Balance  string `json:"balance"`
 }
 
 type ResponseHistory struct {
-	List []Transaction `json:"list"`
+	List []FormatTransaction `json:"list"`
 }
 
 type ResponseError struct {
@@ -66,5 +72,6 @@ type ResponseError struct {
 const (
 	ActionDeposit  = "Desposit"
 	ActionWithdraw = "Withdraw"
-	ActionTransfer = "Transfer"
+	ActionSend     = "Send"
+	ActionReceive  = "Receive"
 )

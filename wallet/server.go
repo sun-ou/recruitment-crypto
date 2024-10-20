@@ -1,9 +1,13 @@
 package wallet
 
 import (
+	"time"
+
 	"crypto.com/pkg"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 )
 
 func NewRouter() *gin.Engine {
@@ -23,6 +27,10 @@ func NewRouter() *gin.Engine {
 	api.GET("/history", c.History)
 	api.GET("/health", c.Health)
 
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("positive_decimal", IsPositiveDecimal)
+	}
+
 	return r
 }
 
@@ -41,7 +49,7 @@ func (w *walletController) Deposit(ctx *gin.Context) {
 
 	result := ResponseBalance{
 		UserName: p.UserName,
-		Balance:  bank.Get(p.UserName).Deposit(p.Money),
+		Balance:  Cent2String(NewUser().Get(p.UserName).Deposit(String2Cent(p.Money))),
 	}
 
 	pkg.NewResponse(ctx).ToResponse(result)
@@ -56,7 +64,7 @@ func (w *walletController) Withdraw(ctx *gin.Context) {
 		return
 	}
 
-	balance, ok := bank.Get(p.UserName).Withdraw(p.Money)
+	balance, ok := NewUser().Get(p.UserName).Withdraw(String2Cent(p.Money))
 	if !ok {
 		pkg.NewResponse(ctx).ToErrorResponse(pkg.InvaildParams.WitchDetails("not enougth money"))
 		return
@@ -64,7 +72,7 @@ func (w *walletController) Withdraw(ctx *gin.Context) {
 
 	result := ResponseBalance{
 		UserName: p.UserName,
-		Balance:  balance,
+		Balance:  Cent2String(balance),
 	}
 
 	pkg.NewResponse(ctx).ToResponse(result)
@@ -79,17 +87,17 @@ func (w *walletController) Transfer(ctx *gin.Context) {
 		return
 	}
 
-	sender := bank.Get(p.UserName)
-	receiver := bank.Get(p.Receiver)
-	senderBalance, receiverBalance, ok := sender.Transfer(receiver, p.Money)
+	sender := NewUser().Get(p.UserName)
+	receiver := NewUser().Get(p.Receiver)
+	senderBalance, receiverBalance, ok := sender.Transfer(receiver, String2Cent(p.Money))
 	if !ok {
 		pkg.NewResponse(ctx).ToErrorResponse(pkg.InvaildParams.WitchDetails("not enougth money"))
 		return
 	}
 
 	result := ResponseTransfer{
-		Sender:   ResponseBalance{UserName: sender.UserName, Balance: senderBalance},
-		Receiver: ResponseBalance{UserName: receiver.UserName, Balance: receiverBalance},
+		Sender:   ResponseBalance{UserName: sender.UserName, Balance: Cent2String(senderBalance)},
+		Receiver: ResponseBalance{UserName: receiver.UserName, Balance: Cent2String(receiverBalance)},
 	}
 
 	pkg.NewResponse(ctx).ToResponse(result)
@@ -106,7 +114,7 @@ func (w *walletController) Balance(ctx *gin.Context) {
 
 	result := ResponseBalance{
 		UserName: p.UserName,
-		Balance:  bank.Get(p.UserName).Balance(),
+		Balance:  Cent2String(NewUser().Get(p.UserName).Balance()),
 	}
 
 	pkg.NewResponse(ctx).ToResponse(result)
@@ -122,7 +130,7 @@ func (w *walletController) History(ctx *gin.Context) {
 	}
 
 	result := ResponseHistory{
-		List: bank.Get(p.UserName).History(),
+		List: w.FormatHistory(NewUser().Get(p.UserName).History()),
 	}
 
 	pkg.NewResponse(ctx).ToResponse(result)
@@ -131,4 +139,52 @@ func (w *walletController) History(ctx *gin.Context) {
 // Health health check
 func (w *walletController) Health(ctx *gin.Context) {
 	pkg.NewResponse(ctx).ToResponse(`ok`)
+}
+
+// FormatHistory format history list
+func (w *walletController) FormatHistory(originHistory []Transaction) (formatHistory []FormatTransaction) {
+	idMap := make(map[uint]string)
+	for _, v := range originHistory {
+		if _, ok := idMap[v.SenderId]; !ok {
+			idMap[v.SenderId] = ""
+		}
+		if _, ok := idMap[v.ReceiverId]; !ok {
+			idMap[v.ReceiverId] = ""
+		}
+	}
+
+	NewUser().GetName(idMap)
+
+	for _, v := range originHistory {
+		vv := FormatTransaction{
+			Id:         v.Id,
+			SenderId:   v.SenderId,
+			ReceiverId: v.ReceiverId,
+			Money:      Cent2String(v.Money),
+			Balance:    Cent2String(v.Balance),
+			Action:     v.Action,
+			CreateDate: time.Unix(v.CreateDate, 0).Format("2006-01-02 15:04:05"),
+		}
+		if _, ok := idMap[v.SenderId]; ok {
+			vv.Sender = idMap[v.SenderId]
+		}
+		if _, ok := idMap[v.ReceiverId]; ok {
+			vv.Receiver = idMap[v.ReceiverId]
+		}
+
+		switch v.Action {
+		case ActionDeposit:
+			vv.Receiver = vv.Sender
+			vv.ReceiverId = vv.SenderId
+			vv.Sender = ""
+			vv.SenderId = 0
+		case ActionWithdraw, ActionSend:
+			// no need to process
+		case ActionReceive:
+			vv.Sender, vv.SenderId, vv.Receiver, vv.ReceiverId = vv.Receiver, vv.ReceiverId, vv.Sender, vv.SenderId
+		}
+
+		formatHistory = append(formatHistory, vv)
+	}
+	return
 }

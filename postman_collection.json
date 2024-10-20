@@ -13,7 +13,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\"user_name\":\"Alice\", \"money\":999}",
+					"raw": "{\"user_name\":\"Alice\", \"money\":\"9.99\"}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -42,7 +42,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\"user_name\":\"Alice\", \"money\":10}",
+					"raw": "{\"user_name\":\"Alice\", \"money\":\"0.5\"}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -71,7 +71,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\"user_name\":\"Alice\", \"money\":10}",
+					"raw": "{\"user_name\":\"Alice\", \"money\":\"5.5\", \"receiver\":\"Bruce\"}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -79,7 +79,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/withdraw",
+					"raw": "http://localhost:8080/api/transfer",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -87,7 +87,7 @@
 					"port": "8080",
 					"path": [
 						"api",
-						"withdraw"
+						"transfer"
 					]
 				}
 			},

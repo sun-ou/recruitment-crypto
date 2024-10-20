@@ -9,10 +9,13 @@ import (
 	"syscall"
 	"time"
 
+	"crypto.com/pkg"
 	"crypto.com/wallet"
 )
 
 func main() {
+	pkg.SetupDBEngine()
+
 	go func() {
 		s.Handler = wallet.NewRouter()
 		if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -24,7 +27,8 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM) // watch for SIGINT (Ctrl+C)
 	<-quit
 
-	s.Close() // shutdown the server
+	s.Close()            // shutdown http server
+	pkg.DBEngine.Close() // shutdown database connection
 	fmt.Printf("\n\nBye!\n\n")
 	os.Exit(0)
 }
