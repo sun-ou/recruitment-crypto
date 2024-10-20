@@ -3,7 +3,7 @@ This program implemented RESTful API to present wallet behaviour.
 
 The reviewer should check the core logic in wallet/server_logic.go file.
 
-The ./coverage file is a coverage report. I use unit test for most of files, except main.go and wallet/server_logic.go.
+The ./coverage file is a coverage report. I used unit test for most of files, except main.go and wallet/server_logic.go.
 I'd rather use integration test for these files.
 
 I did not implement authentication. If I have more time, I would like to introduce jwt for authentication.
