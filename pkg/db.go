@@ -3,6 +3,7 @@ package pkg
 import (
 	"database/sql"
 	"fmt"
+	"os"
 	"sync"
 
 	_ "github.com/lib/pq"
@@ -15,7 +16,7 @@ var (
 )
 
 var CryptoDBsetting = &DBSetting{
-	Host:     "192.168.56.127:5432", // should be changed to run unit test, eg: 192.168.56.127:5432
+	Host:     "db", // should be changed to run unit test, eg: 192.168.56.127:5432
 	DBName:   "crypto",
 	UserName: "postgres",
 	Password: "postgres",
@@ -43,6 +44,9 @@ func SetupDBEngine() error {
 		DBmu.Lock()
 		defer DBmu.Unlock()
 
+		if h := os.Getenv("pq_host"); h != "" { // should be changed to run unit test, eg: 192.168.56.127:5432
+			CryptoDBsetting.Host = h
+		}
 		DBEngine, err = NewDBEngine(CryptoDBsetting)
 	})
 	if err != nil {
@@ -53,6 +57,9 @@ func SetupDBEngine() error {
 
 func SetupTestDBEngine() error {
 	var err error
+	if h := os.Getenv("pq_host"); h != "" { // should be changed to run unit test, eg: 192.168.56.127:5432
+		CryptoDBsetting.Host = h
+	}
 	DBEngine, err = NewDBEngine(CryptoDBsetting)
 	if err != nil {
 		return err
